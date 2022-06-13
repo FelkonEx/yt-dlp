@@ -374,6 +374,8 @@ class TwitchVodIE(TwitchBaseIE):
             'description': info.get('description'),
             'duration': int_or_none(info.get('lengthSeconds')),
             'thumbnail': thumbnail,
+            'category': try_get(info, lambda x: x['game']['displayName'], compat_str),
+            'category_id': try_get(info, lambda x: x['game']['id'], compat_str),
             'uploader': try_get(info, lambda x: x['owner']['displayName'], compat_str),
             'uploader_id': try_get(info, lambda x: x['owner']['login'], compat_str),
             'timestamp': unified_timestamp(info.get('publishedAt')),
