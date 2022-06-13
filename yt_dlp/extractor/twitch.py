@@ -885,6 +885,11 @@ class TwitchStreamIE(TwitchBaseIE):
             gql, lambda x: x[2]['data']['user']['stream']['previewImageURL'],
             compat_str))
 
+        category = try_get(
+            sq_user, lambda x: x['stream']['game']['name'], compat_str)
+        category_id = try_get(
+            sq_user, lambda x: x['stream']['game']['id'], compat_str)
+
         title = uploader or channel_name
         stream_type = stream.get('type')
         if stream_type in ['rerun', 'live']:
@@ -896,6 +901,8 @@ class TwitchStreamIE(TwitchBaseIE):
             'title': title,
             'description': description,
             'thumbnail': thumbnail,
+            'category': category,
+            'category_id': category_id,
             'uploader': uploader,
             'uploader_id': channel_name,
             'timestamp': timestamp,
