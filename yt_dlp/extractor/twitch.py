@@ -988,6 +988,10 @@ class TwitchClipsIE(TwitchBaseIE):
     small: thumbnailURL(width: 260, height: 147)
     medium: thumbnailURL(width: 480, height: 272)
     title
+    game {
+      id
+      displayName
+    }
     videoQualities {
       frameRate
       quality
@@ -1036,6 +1040,8 @@ class TwitchClipsIE(TwitchBaseIE):
             'id': clip.get('id') or video_id,
             'display_id': video_id,
             'title': clip.get('title') or video_id,
+            'category': try_get(clip, lambda x: x['game']['displayName'], compat_str),
+            'category_id': try_get(clip, lambda x: x['game']['id'], compat_str),
             'formats': formats,
             'duration': int_or_none(clip.get('durationSeconds')),
             'view_count': int_or_none(clip.get('viewCount')),
