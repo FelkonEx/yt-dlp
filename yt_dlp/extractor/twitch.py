@@ -411,6 +411,7 @@ class TwitchVodIE(TwitchBaseIE):
                     thumbnail = thumbnail.replace('{%s}' % p, '0')
         
         categories = list(self._extract_categories(info, item_id))
+        chapters = list(self._extract_moments(info, item_id))
         
         return {
             'id': vod_id,
@@ -423,7 +424,7 @@ class TwitchVodIE(TwitchBaseIE):
             'uploader_id': try_get(info, lambda x: x['owner']['login'], compat_str),
             'timestamp': unified_timestamp(info.get('publishedAt')),
             'view_count': int_or_none(info.get('viewCount')),
-            'chapters': list(self._extract_moments(info, item_id)),
+            'chapters': chapters,
             'is_live': is_live,
             'was_live': True,
         }
