@@ -386,7 +386,7 @@ class TwitchVodIE(TwitchBaseIE):
             }
         else:
             for category in info.get('moments') or []:
-                category_details = category.get('details').get('game')
+                category_details = traverse_obj(category, ('details', 'game'))
                 category_id = str_or_none(category_details.get('id'))
                 category_name = str_or_none(category_details.get('displayName'))
 
@@ -420,8 +420,8 @@ class TwitchVodIE(TwitchBaseIE):
             'duration': int_or_none(info.get('lengthSeconds')),
             'thumbnail': thumbnail,
             'categories': categories,
-            'uploader': try_get(info, lambda x: x['owner']['displayName'], compat_str),
-            'uploader_id': try_get(info, lambda x: x['owner']['login'], compat_str),
+            'uploader': traverse_obj(info, ('owner', 'displayName')),
+            'uploader_id': traverse_obj(info, ('owner', 'login')),
             'timestamp': unified_timestamp(info.get('publishedAt')),
             'view_count': int_or_none(info.get('viewCount')),
             'chapters': chapters,
@@ -924,17 +924,14 @@ class TwitchStreamIE(TwitchBaseIE):
 
         sq_user = try_get(gql, lambda x: x[1]['data']['user'], dict) or {}
         uploader = sq_user.get('displayName')
-        description = try_get(
-            sq_user, lambda x: x['broadcastSettings']['title'], compat_str)
+        description = traverse_obj(sq_user, ('broadcastSettings', 'title', 'name'))
 
         thumbnail = url_or_none(try_get(
             gql, lambda x: x[2]['data']['user']['stream']['previewImageURL'],
             compat_str))
 
-        category = try_get(
-            sq_user, lambda x: x['stream']['game']['name'], compat_str)
-        category_id = try_get(
-            sq_user, lambda x: x['stream']['game']['id'], compat_str)
+        category = traverse_obj(sq_user, ('stream', 'game', 'name'))
+        category_id = traverse_obj(sq_user, ('stream', 'game', 'id'))
 
         title = uploader or channel_name
         stream_type = stream.get('type')
@@ -1055,7 +1052,7 @@ class TwitchClipsIE(TwitchBaseIE):
 }''' % video_id}, 'Downloading clip GraphQL', fatal=False)
 
         if data:
-            clip = try_get(data, lambda x: x['data']['clip'], dict) or clip
+            clip = traverse_obj(data, ('broadcastSettings', 'title', 'name')) or clip
 
         formats = []
         for option in clip.get('videoQualities', []):
@@ -1093,14 +1090,14 @@ class TwitchClipsIE(TwitchBaseIE):
             'id': clip.get('id') or video_id,
             'display_id': video_id,
             'title': clip.get('title') or video_id,
-            'category': try_get(clip, lambda x: x['game']['displayName'], compat_str),
-            'category_id': try_get(clip, lambda x: x['game']['id'], compat_str),
+            'category': traverse_obj(clip, ('game', 'displayName')),
+            'category_id': traverse_obj(clip, ('game', 'id')),
             'formats': formats,
             'duration': int_or_none(clip.get('durationSeconds')),
             'view_count': int_or_none(clip.get('viewCount')),
             'timestamp': unified_timestamp(clip.get('createdAt')),
             'thumbnails': thumbnails,
-            'creator': try_get(clip, lambda x: x['broadcaster']['displayName'], compat_str),
-            'uploader': try_get(clip, lambda x: x['curator']['displayName'], compat_str),
-            'uploader_id': try_get(clip, lambda x: x['curator']['id'], compat_str),
+            'creator': traverse_obj(clip, ('broadcaster', 'displayName')),
+            'uploader': traverse_obj(clip, ('curator', 'displayName')),
+            'uploader_id': traverse_obj(clip, ('curator', 'id')),
         }
