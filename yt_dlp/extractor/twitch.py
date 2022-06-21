@@ -546,8 +546,8 @@ class TwitchPlaylistBaseIE(TwitchBaseIE):
                 fatal=False)
             if not page:
                 break
-            edges = try_get(
-                page, lambda x: x[0]['data']['user'][entries_key]['edges'], list)
+            edges = traverse_obj(
+                page, ([0, 'data', 'user', entries_key, 'edges']))
             if not edges:
                 break
             for edge in edges:
@@ -922,13 +922,12 @@ class TwitchStreamIE(TwitchBaseIE):
         view_count = stream.get('viewers')
         timestamp = unified_timestamp(stream.get('createdAt'))
 
-        sq_user = try_get(gql, lambda x: x[1]['data']['user'], dict) or {}
+        sq_user = traverse_obj(gql, (1, 'data', 'user'), {})
         uploader = sq_user.get('displayName')
         description = traverse_obj(sq_user, ('broadcastSettings', 'title', 'name'))
 
-        thumbnail = url_or_none(try_get(
-            gql, lambda x: x[2]['data']['user']['stream']['previewImageURL'],
-            compat_str))
+        thumbnail = url_or_none(traverse_obj(
+            gql, (2, 'data', 'user', 'stream', 'previewImageURL')))
 
         category = traverse_obj(sq_user, ('stream', 'game', 'name'))
         category_id = traverse_obj(sq_user, ('stream', 'game', 'id'))
@@ -1052,7 +1051,7 @@ class TwitchClipsIE(TwitchBaseIE):
 }''' % video_id}, 'Downloading clip GraphQL', fatal=False)
 
         if data:
-            clip = traverse_obj(data, ('broadcastSettings', 'title', 'name')) or clip
+            clip = traverse_obj(data, ('broadcastSettings', 'title', 'name'), clip)
 
         formats = []
         for option in clip.get('videoQualities', []):
