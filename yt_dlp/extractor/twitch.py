@@ -202,6 +202,12 @@ class TwitchVodIE(TwitchBaseIE):
             'uploader_id': 'riotgames',
             'view_count': int,
             'start_time': 310,
+            'categories': [
+                {
+                    'id': '21779', 
+                    'name': 'League of Legends'
+                }
+            ]
         },
         'params': {
             # m3u8 download
@@ -270,6 +276,19 @@ class TwitchVodIE(TwitchBaseIE):
                     'title': 'Art'
                 }
             ],
+            'categories': [
+                {
+                    'id': '21779', 
+                    'name': 'League of Legends'
+                }, 
+                {
+                    'id': '514790', 
+                    'name': 'Legends of Runeterra'
+                }, 
+                {
+                    'id': '509660', 
+                    'name': 'Art'
+                }]
         },
         'params': {
             'skip_download': True
@@ -353,6 +372,29 @@ class TwitchVodIE(TwitchBaseIE):
                 'title': name,
             }
 
+    def _extract_categories(self, info, item_id):
+        moments = info.get('moments')
+
+        if moments is None:
+            category_details = info.get('game')
+            category_id = str_or_none(category_details.get('id'))
+            category_name = str_or_none(category_details.get('displayName'))
+
+            yield {
+                'id': category_id,
+                'name': category_name
+            }
+        else:
+            for category in info.get('moments') or []:
+                category_details = category.get('details').get('game')
+                category_id = str_or_none(category_details.get('id'))
+                category_name = str_or_none(category_details.get('displayName'))
+
+                yield {
+                    'id': category_id,
+                    'name': category_name
+                }
+            
     def _extract_info_gql(self, info, item_id):
         vod_id = info.get('id') or item_id
         # id backward compatibility for download archives
@@ -367,15 +409,16 @@ class TwitchVodIE(TwitchBaseIE):
                 is_live = False
                 for p in ('width', 'height'):
                     thumbnail = thumbnail.replace('{%s}' % p, '0')
-
+        
+        categories = list(self._extract_categories(info, item_id))
+        
         return {
             'id': vod_id,
             'title': info.get('title') or 'Untitled Broadcast',
             'description': info.get('description'),
             'duration': int_or_none(info.get('lengthSeconds')),
             'thumbnail': thumbnail,
-            'category': try_get(info, lambda x: x['game']['displayName'], compat_str),
-            'category_id': try_get(info, lambda x: x['game']['id'], compat_str),
+            'categories': categories,
             'uploader': try_get(info, lambda x: x['owner']['displayName'], compat_str),
             'uploader_id': try_get(info, lambda x: x['owner']['login'], compat_str),
             'timestamp': unified_timestamp(info.get('publishedAt')),
