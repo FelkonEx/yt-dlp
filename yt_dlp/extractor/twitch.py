@@ -204,7 +204,7 @@ class TwitchVodIE(TwitchBaseIE):
             'start_time': 310,
             'categories': [
                 {
-                    'id': '21779', 
+                    'id': '21779',
                     'name': 'League of Legends'
                 }
             ]
@@ -278,15 +278,15 @@ class TwitchVodIE(TwitchBaseIE):
             ],
             'categories': [
                 {
-                    'id': '21779', 
+                    'id': '21779',
                     'name': 'League of Legends'
-                }, 
+                },
                 {
-                    'id': '514790', 
+                    'id': '514790',
                     'name': 'Legends of Runeterra'
-                }, 
+                },
                 {
-                    'id': '509660', 
+                    'id': '509660',
                     'name': 'Art'
                 }]
         },
@@ -394,7 +394,7 @@ class TwitchVodIE(TwitchBaseIE):
                     'id': category_id,
                     'name': category_name
                 }
-            
+
     def _extract_info_gql(self, info, item_id):
         vod_id = info.get('id') or item_id
         # id backward compatibility for download archives
@@ -409,10 +409,10 @@ class TwitchVodIE(TwitchBaseIE):
                 is_live = False
                 for p in ('width', 'height'):
                     thumbnail = thumbnail.replace('{%s}' % p, '0')
-        
+
         categories = list(self._extract_categories(info, item_id))
         chapters = list(self._extract_moments(info, item_id))
-        
+
         return {
             'id': vod_id,
             'title': info.get('title') or 'Untitled Broadcast',
