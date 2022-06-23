@@ -23,7 +23,6 @@ from ..utils import (
     qualities,
     str_or_none,
     traverse_obj,
-    try_get,
     unified_timestamp,
     update_url_query,
     url_or_none,
